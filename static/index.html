@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>NORDA Sentinel — AML Compliance Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        },
+        colors: {
+          ink: {
+            950: '#070a0f',
+            900: '#0b0e14',
+            850: '#10141c',
+            800: '#151a23',
+            750: '#1b212c',
+            700: '#232a36',
+            600: '#2e3744',
+            500: '#3d4654',
+            400: '#5b6573',
+            300: '#8a93a1',
+            200: '#b6bdc8',
+            100: '#dfe3eb',
+            50:  '#f1f3f7',
+          },
+          teal: {
+            DEFAULT: '#14b8a6',
+            dim: '#0d9488',
+            soft: 'rgba(20,184,166,0.12)',
+            line: 'rgba(20,184,166,0.35)',
+          },
+          risk: {
+            high: '#ef4444',
+            mid:  '#f59e0b',
+            low:  '#10b981',
+          },
+        },
+        boxShadow: {
+          'panel': '0 1px 0 0 rgba(255,255,255,0.02) inset, 0 0 0 1px rgba(255,255,255,0.02)',
+          'inset-line': 'inset 0 -1px 0 0 #1b212c',
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body { background: #070a0f; color: #dfe3eb; font-feature-settings: "ss01","cv11","tnum"; }
+  body { font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .mono, code, pre, .tabular { font-family: 'Geist Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
+  *::selection { background: rgba(20,184,166,0.35); color: #fff; }
+
+  /* hairline */
+  .hair  { box-shadow: inset 0 -1px 0 0 #1b212c; }
+  .hair-t{ box-shadow: inset 0  1px 0 0 #1b212c; }
+  .hair-r{ box-shadow: inset -1px 0 0 0 #1b212c; }
+  .hair-l{ box-shadow: inset  1px 0 0 0 #1b212c; }
+
+  /* dotted background pattern for empty surfaces */
+  .grid-dots {
+    background-image: radial-gradient(circle at 1px 1px, #1b212c 1px, transparent 0);
+    background-size: 16px 16px;
+  }
+
+  /* scanline reveal animation for security panel */
+  @keyframes scanline {
+    from { transform: translateY(-100%); opacity: 0.6; }
+    to   { transform: translateY(100%); opacity: 0; }
+  }
+  @keyframes typeline {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+  .anim-type { animation: typeline 350ms steps(40, end) both; }
+  @keyframes pulsedot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%     { opacity: .35; transform: scale(.85); }
+  }
+  .pulse-dot::before {
+    content:''; position:absolute; inset:-4px; border-radius:9999px;
+    background: currentColor; opacity:.25; animation: pulsedot 2.2s ease-in-out infinite;
+  }
+  .pulse-dot { position: relative; }
+
+  /* tiny grid backdrop */
+  .crosshatch {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* range-style risk meter */
+  .meter-track { background: linear-gradient(90deg, #10b981 0%, #f59e0b 55%, #ef4444 100%); }
+
+  /* table row hover */
+  tr.row:hover td { background: #10141c; }
+
+  /* keep monospace numbers tabular */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  /* hide scrollbar in code viewers but keep scroll */
+  .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .thin-scroll::-webkit-scrollbar-thumb { background: #232a36; border-radius: 4px; }
+  .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+
+  /* button look */
+  .btn { display:inline-flex; align-items:center; gap:.5rem; height:30px; padding:0 .75rem; border:1px solid #232a36; background:#10141c; color:#dfe3eb; font-size:12px; letter-spacing:.01em; border-radius:4px; transition: border-color 120ms, background 120ms; }
+  .btn:hover { border-color:#3d4654; background:#151a23; }
+  .btn-primary { background:#0d9488; border-color:#14b8a6; color:#fff; }
+  .btn-primary:hover { background:#14b8a6; border-color:#2dd4bf; }
+  .btn-danger { background:#7f1d1d; border-color:#b91c1c; color:#fff; }
+  .btn-danger:hover { background:#991b1b; border-color:#ef4444; }
+  .btn-ghost { background: transparent; }
+
+  /* subtle red banner */
+  .banner-suspended {
+    background: repeating-linear-gradient(45deg, rgba(239,68,68,.10) 0 14px, rgba(239,68,68,.04) 14px 28px);
+  }
+
+  /* focus ring */
+  :where(button, [role="button"], a, input, textarea, select):focus-visible {
+    outline: 1px solid #14b8a6; outline-offset: 1px;
+  }
+
+  /* segmented control style */
+  .seg { display:inline-flex; border:1px solid #232a36; border-radius:4px; overflow:hidden; }
+  .seg > button { padding: 0 .625rem; height:28px; font-size:12px; color:#8a93a1; background:transparent; }
+  .seg > button + button { border-left:1px solid #232a36; }
+  .seg > button[aria-pressed="true"] { background:#151a23; color:#dfe3eb; }
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Lucide -->
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+
+<!-- App scripts -->
+<script type="text/babel" src="src/icons.jsx"></script>
+<script type="text/babel" src="src/mocks.jsx"></script>
+<script type="text/babel" src="src/ui.jsx"></script>
+<script type="text/babel" src="src/shell.jsx"></script>
+<script type="text/babel" src="src/page-cases.jsx"></script>
+<script type="text/babel" src="src/page-case.jsx"></script>
+<script type="text/babel" src="src/page-audit.jsx"></script>
+<script type="text/babel" src="src/page-security.jsx"></script>
+<script type="text/babel" src="src/app.jsx"></script>
+
+</body>
+</html>
