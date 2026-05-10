@@ -34,7 +34,7 @@ Agents (run in thread pool, call governance over HTTP)
 |------|---------|
 | Python | 3.12+ |
 | [uv](https://docs.astral.sh/uv/getting-started/installation/) | latest |
-| Groq API key | free tier works |
+| Local LLM via Ollama |
 
 Install uv (PowerShell):
 
